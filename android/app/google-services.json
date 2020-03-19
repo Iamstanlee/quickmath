@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "46032253846",
+    "firebase_url": "https://quickmath-app.firebaseio.com",
+    "project_id": "quickmath-app",
+    "storage_bucket": "quickmath-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46032253846:android:68819ef8e9e05f7b5263b7",
+        "android_client_info": {
+          "package_name": "com.stanlee.quickmath"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "46032253846-6ulbm9bhaaqc2auhliq29ache8rko5mm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1C87hFLA1AC33ojk9iGI5t43Ns2V50pY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46032253846-6ulbm9bhaaqc2auhliq29ache8rko5mm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
