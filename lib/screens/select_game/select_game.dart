@@ -29,11 +29,7 @@ class _SelectGameState extends State<SelectGame>
   int gameCodeInput;
 
   @override
-  void afterFirstLayout(BuildContext context) {
-    MpBloc mpBloc = Provider.of<MpBloc>(context, listen: false);
-    mpBloc.getOnlinePresence();
-    mpBloc.getOnlineStatus();
-  }
+  void afterFirstLayout(BuildContext context) {}
 
   /// show question dialog for singleplayer mode
   void showQuestionsDialog() {
@@ -178,10 +174,9 @@ class _SelectGameState extends State<SelectGame>
                   Toast.dismiss();
                   pop(context);
                   push(context, GameRoom());
-                }, onError: () {
+                }, onError: (err) {
                   Toast.dismiss();
-                  Toast.show('Error', context, gravity: Toast.TOP);
-                  // print("** Error creating game => $err **");
+                  Toast.show('$err', context, gravity: Toast.TOP);
                 });
               }
             },

@@ -25,6 +25,25 @@ String getReference() {
   return '#' + timestamp;
 }
 
+// 0 - 200 - 500 - 900 - 1200
+String getRankBadge(String rank) {
+  String badge;
+  switch (rank) {
+    case 'Novice':
+      break;
+    case 'Veteran':
+      break;
+    case 'Pro':
+      break;
+    case 'Master':
+      break;
+    case 'Legendary':
+      break;
+    default:
+  }
+  return badge;
+}
+
 /// takes a percentage of the screens width and return a double of current width
 double getWidth(context, {width}) {
   if (width == null) return MediaQuery.of(context).size.width;
@@ -108,9 +127,13 @@ String getBannerAdUnitId() {
 
 /// Navigate to a new route by passing a route widget
 ///  and dispose the previous routes
-void pushToDispose(context, to) {
+void pushToDispose(context, to, {Widget predicate}) {
   Navigator.pushAndRemoveUntil(
-      context, CupertinoPageRoute(builder: (context) => to), (_) => false);
+      context, CupertinoPageRoute(builder: (context) => to), (route) {
+    if (predicate != null) if (route ==
+        CupertinoPageRoute(builder: (context) => predicate)) return true;
+    return false;
+  });
 }
 
 /// Show snack bar from anywhere in the by passing a global key of type scffold state and the string to be displayed

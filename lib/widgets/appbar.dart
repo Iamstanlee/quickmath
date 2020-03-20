@@ -59,7 +59,7 @@ class _AppbarWidgetState extends State<AppbarWidget> {
                       InkWell(onTap: () {}, child: CircleAvatar()),
                       Padding(
                         padding: EdgeInsets.only(left: 8.0),
-                        child: Text('Dev Stanlee',
+                        child: Text('${widget.label}',
                             style: TextStyle(
                                 fontFamily: fontThree,
                                 fontWeight: FontWeight.w600)),

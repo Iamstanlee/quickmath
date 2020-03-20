@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quickmath/data/operator.dart';
 import 'package:quickmath/data/question.dart';
 import 'package:quickmath/data/user.dart';
@@ -14,13 +15,11 @@ class MpBloc with ChangeNotifier {
   Firestore firestore = Firestore.instance;
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   FirebaseDatabase firebaseDatabase = FirebaseDatabase.instance;
-  FirebaseUser firebaseUser;
   String _uniqueId;
   String get uniqueId => _uniqueId;
   bool _onlineStatus = false;
   bool get onlineStatus => _onlineStatus;
   int _gameCode;
-
   set uniqueId(String uid) {
     this._uniqueId = uid;
   }
@@ -44,9 +43,7 @@ class MpBloc with ChangeNotifier {
 
   /// listen to the user online status
   void getOnlineStatus() async {
-    firebaseUser = await getCurrentUser();
-    firestore.collection('users').document(firebaseUser.uid).snapshots().listen(
-        (user) {
+    firestore.collection('users').document(uniqueId).snapshots().listen((user) {
       bool myStatus = user.data['online'];
       onlineStatus = myStatus;
     }, onError: (err) {
@@ -54,10 +51,58 @@ class MpBloc with ChangeNotifier {
     });
   }
 
+  Stream<DocumentSnapshot> onlineInGameStream() {
+    return firestore.collection('games').document("$gameCode").snapshots();
+  }
+
+  /// set the game active status to true and
+  /// move the players to the loadgame screen
+  void moveUsersToLoadGame(
+      {Function(String) onDone, Function(String) onError}) {
+    try {
+      DocumentReference documentReference =
+          firestore.collection('games').document('$gameCode');
+      documentReference.get().then((DocumentSnapshot snapshot) {
+        List<User> players = snapshot.data['players'].map<User>((user) {
+          return User.fromMap(user);
+        }).toList();
+        User creator =
+            players.firstWhere((player) => player.isGameCreator = true);
+        if (creator.uid == uniqueId) {
+          documentReference.updateData({'isActive': true});
+          onDone('');
+        } else {
+          onDone('Only room leads can start the Game.');
+        }
+      });
+    } catch (err) {
+      onError('$err');
+    }
+  }
+
+  void moveUsersToInGame({Function(String) onDone, Function(String) onError}) {
+    try {
+      DocumentReference documentReference =
+          firestore.collection('games').document('$gameCode');
+      documentReference.get().then((DocumentSnapshot snapshot) {
+        List<User> players = snapshot.data['players'].map<User>((user) {
+          return User.fromMap(user);
+        }).toList();
+        User creator =
+            players.firstWhere((player) => player.isGameCreator = true);
+        if (creator.uid == uniqueId) {
+          documentReference.updateData({'isActive': true});
+          onDone('');
+        }
+      });
+    } catch (err) {
+      onError('$err');
+    }
+  }
+
   /// detect user online presence when connected or disconnected
   void getOnlinePresence() async {
-    firebaseUser = await getCurrentUser();
-    uniqueId = firebaseUser.uid;
+    uniqueId = uniqueId;
     DatabaseReference databaseReference = firebaseDatabase.reference();
     DatabaseReference dbStatusReference =
         databaseReference.child('status/$uniqueId');
@@ -65,9 +110,9 @@ class MpBloc with ChangeNotifier {
       DataSnapshot dataSnapshot = event.snapshot;
       bool status = dataSnapshot.value;
       if (status == false) {
-        updateOnlineStatus(firebaseUser.uid, status);
+        updateOnlineStatus(uniqueId, status);
         if (gameCode != null)
-          updateOnlineStatusInGame(gameCode, firebaseUser.uid, status);
+          updateOnlineStatusInGame(gameCode, uniqueId, status);
         return;
       }
       dbStatusReference.onDisconnect().set(update(false)).then((onUpdate) {
@@ -75,8 +120,8 @@ class MpBloc with ChangeNotifier {
         dbStatusReference.set(update(status));
         // sync with firestore
         if (gameCode != null)
-          updateOnlineStatusInGame(gameCode, firebaseUser.uid, status);
-        updateOnlineStatus(firebaseUser.uid, status);
+          updateOnlineStatusInGame(gameCode, uniqueId, status);
+        updateOnlineStatus(uniqueId, status);
       });
     }, onError: (err) {
       print('** Connection Error => $err**');
@@ -161,22 +206,50 @@ class MpBloc with ChangeNotifier {
   }
 
   /// join a game with a game code
-  void joinGame(int gc, {Function onDone, Function onError}) async {
+  void joinGame(int gc, {Function onDone, Function(String) onError}) async {
     User user;
-    DocumentSnapshot documentSnapshot =
-        await firestore.collection('users').document(uniqueId).get();
-    user = User.fromMap(documentSnapshot.data);
-    firestore.collection('games').document('$gc').updateData({
-      'players': FieldValue.arrayUnion([User.toMap(user)]),
-    }).then((_) {
-      // return game code onDone
-      documentSnapshot.reference.updateData({'game': gc});
-      gameCode = gc;
-      onDone(gameCode);
-    }).catchError((err) {
-      print("** Error joining gamecode => ${err.message} **");
-      onError();
-    });
+    try {
+      DocumentSnapshot documentSnapshot =
+          await firestore.collection('users').document(uniqueId).get();
+      user = User.fromMap(documentSnapshot.data);
+      DocumentSnapshot gameDocumentSnapshot =
+          await firestore.collection('games').document('$gc').get();
+      if (gameDocumentSnapshot.exists) {
+        if (gameDocumentSnapshot.data['isActive']) {
+          onError('This game is already in Progress.');
+        } else {
+          bool joined = false;
+          for (int i = 0;
+              i < gameDocumentSnapshot.data['players'].length;
+              i++) {
+            if (gameDocumentSnapshot.data['players'][i]['userId'] == uniqueId)
+              joined = true;
+          }
+          if (joined) {
+            gameCode = gc;
+            onDone(gameCode);
+          } else {
+            gameDocumentSnapshot.reference.updateData({
+              'players': FieldValue.arrayUnion([User.toMap(user)]),
+            }).then((_) {
+              // return game code onDone
+              documentSnapshot.reference.updateData({'game': gc});
+              gameCode = gc;
+              onDone(gameCode);
+            }).catchError((err) {
+              print("*** Error joining gamecode => $err **");
+              onError('Something went wrong, Try again.');
+            });
+          }
+        }
+      } else {
+        onError(
+            'This game does not exist. Create a game and invite your friends to join you!');
+      }
+    } catch (err) {
+      print("** Error joining gamecode => $err **");
+      onError('Something went wrong, Try again.');
+    }
   }
 
   /// get the currently signed user

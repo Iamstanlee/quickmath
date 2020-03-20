@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quickmath/bloc/auth_bloc.dart';
+import 'package:quickmath/bloc/multiplayer.dart';
 import 'package:quickmath/helpers/constants.dart';
 import 'package:quickmath/helpers/functions.dart';
 import 'package:quickmath/screens/select_game/select_game.dart';
 import 'package:quickmath/widgets/drawer.dart';
 import 'package:quickmath/widgets/fancy_button.dart';
+import 'package:quickmath/widgets/toast.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -15,6 +19,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    AuthBloc authBloc = Provider.of<AuthBloc>(context);
+
     return Scaffold(
         key: scaffoldKey,
         backgroundColor: bgColor,
@@ -37,7 +43,7 @@ class _HomeState extends State<Home> {
                       child: CircleAvatar()),
                   Padding(
                     padding: EdgeInsets.only(left: 8.0),
-                    child: Text('Dev Stanlee',
+                    child: Text('${authBloc.firebaseUser.displayName}',
                         style: TextStyle(
                             fontFamily: fontThree,
                             fontWeight: FontWeight.w600)),
@@ -73,7 +79,10 @@ class _HomeState extends State<Home> {
                         highlightedBorderColor: Colors.white10,
                         highlightColor: Colors.white10,
                         icon: loadPng('trophy', height: 28),
-                        onPressed: () {},
+                        onPressed: () {
+                          Toast.show('Coming Soon', context,
+                              gravity: Toast.TOP);
+                        },
                         padding: EdgeInsets.symmetric(
                             horizontal: 27.0, vertical: 16),
                         label: Text('Leadership Board',

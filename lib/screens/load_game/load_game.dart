@@ -6,10 +6,12 @@ import 'package:quickmath/bloc/singleplayer.dart';
 import 'package:quickmath/helpers/constants.dart';
 import 'package:quickmath/helpers/functions.dart';
 import 'package:quickmath/screens/game/game.dart';
+import 'package:quickmath/screens/game/multiplayer_game/multiplayer_game.dart';
 
 class LoadGame extends StatefulWidget {
   final int questions;
-  LoadGame({this.questions});
+  final String gameType;
+  LoadGame({this.questions, this.gameType = 'SP'});
   @override
   _LoadGameState createState() => _LoadGameState();
 }
@@ -19,12 +21,21 @@ class _LoadGameState extends State<LoadGame> with AfterLayoutMixin<LoadGame> {
 
   @override
   void afterFirstLayout(BuildContext context) {
-    Provider.of<SpBloc>(context, listen: false)
-        .generateQuestions(widget.questions, onDone: () {
-      Future.delayed(Duration(seconds: 2), () {
-        replace(context, Game());
+    if (widget.gameType == 'MP') {
+      Provider.of<SpBloc>(context, listen: false)
+          .generateQuestions(widget.questions, onDone: () {
+        Future.delayed(Duration(seconds: 1), () {
+          replace(context, MultiPlayerGame());
+        });
       });
-    });
+    } else {
+      Provider.of<SpBloc>(context, listen: false)
+          .generateQuestions(widget.questions, onDone: () {
+        Future.delayed(Duration(seconds: 1), () {
+          replace(context, Game());
+        });
+      });
+    }
   }
 
   @override

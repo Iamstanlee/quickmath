@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:quickmath/bloc/auth_bloc.dart';
 import 'package:quickmath/bloc/singleplayer.dart';
 import 'package:quickmath/data/operator.dart';
 import 'package:quickmath/data/question.dart';
@@ -33,10 +34,12 @@ class _GameState extends State<Game> with AfterLayoutMixin<Game> {
   void afterFirstLayout(BuildContext context) {
     setState(() {
       questions = Provider.of<SpBloc>(context, listen: false).questions;
+      AuthBloc authBloc = Provider.of<AuthBloc>(context, listen: false);
+
       widgets.add(buildDateWidget());
       widgets.add(buildModerator(
           update:
-              'Hello DevStanlee, I\'m your moderator. \n This game contains ${questions.length} questions, \n You\'re to answer them quickly in the smallest possible time. \n You got this!'));
+              'Hello ${authBloc.firebaseUser.displayName.split(' ')[0]}, I\'m your moderator. \n This game contains ${questions.length} questions, \n You\'re to answer them quickly in the smallest possible time. \n You got this!'));
       startTimer = Timer.periodic(Duration(seconds: 1), (timer) {
         if (time == 0) {
           timer.cancel();
@@ -156,6 +159,7 @@ class _GameState extends State<Game> with AfterLayoutMixin<Game> {
   @override
   Widget build(BuildContext context) {
     SpBloc spBloc = Provider.of<SpBloc>(context, listen: false);
+    AuthBloc authBloc = Provider.of<AuthBloc>(context, listen: false);
     int i = spBloc.currentIndex;
     int qsLength = i + 1;
     return Scaffold(
@@ -165,6 +169,7 @@ class _GameState extends State<Game> with AfterLayoutMixin<Game> {
         children: <Widget>[
           AppbarWidget(
             appbarType: AppbarType.Regular,
+            label: authBloc.firebaseUser.displayName,
             action: Padding(
               padding: EdgeInsets.only(right: 16),
               child: Container(

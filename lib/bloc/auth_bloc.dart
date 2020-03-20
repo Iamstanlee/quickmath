@@ -25,7 +25,10 @@ class AuthBloc extends ChangeNotifier {
   }
 
   /// handles signIn from google auth provider takes [onDone],[isUser] & [onError] params
-  void signIn({Function onDone, Function isUser, Function onError}) async {
+  void signIn(
+      {Function(FirebaseUser) onDone,
+      Function(FirebaseUser) isUser,
+      Function onError}) async {
     FirebaseUser user = await signInWithGoogle(onError: onError);
     if (user != null) {
       await Firestore.instance
@@ -35,21 +38,24 @@ class AuthBloc extends ChangeNotifier {
           .then((DocumentSnapshot documentSnapshot) {
         if (!documentSnapshot.exists) {
           User newUser = new User(
-              username: '',
+              username: user.displayName,
+              // username: '',
               email: user.email,
               phonenumber: user.phoneNumber,
               uid: user.uid,
               avatar: user.photoUrl,
+              rank: 'Novice',
+              rankXp: 0,
               online: true);
           documentSnapshot.reference
               .setData(User.toMap(newUser))
               .whenComplete(() {
             firebaseUser = user;
-            onDone();
+            onDone(user);
           });
         } else {
           firebaseUser = user;
-          isUser();
+          isUser(user);
         }
       }).catchError((err) {
         print('**Error Signing In -> $err**');

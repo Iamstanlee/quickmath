@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quickmath/bloc/auth_bloc.dart';
 import 'package:quickmath/helpers/constants.dart';
 import 'package:quickmath/helpers/functions.dart';
 
@@ -11,6 +13,7 @@ class DrawerWidget extends StatefulWidget {
 class _DrawerWidgetState extends State<DrawerWidget> {
   @override
   Widget build(BuildContext context) {
+    AuthBloc authBloc = Provider.of<AuthBloc>(context);
     return Scaffold(
         body: Column(
       children: <Widget>[
@@ -22,7 +25,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
               InkWell(onTap: () {}, child: CircleAvatar()),
               Padding(
                 padding: EdgeInsets.only(left: 8.0),
-                child: Text('Dev Stanlee',
+                child: Text('${authBloc.firebaseUser.displayName}',
                     style: TextStyle(
                         fontFamily: fontThree, fontWeight: FontWeight.w600)),
               )
@@ -44,7 +47,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Divider(),
-                      Text('Rank - ✨Master',
+                      Text('Rank - ✨Novice',
                           style: TextStyle(
                               fontFamily: fontThree,
                               fontWeight: FontWeight.w600)),

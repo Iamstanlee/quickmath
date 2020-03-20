@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickmath/bloc/auth_bloc.dart';
+import 'package:quickmath/bloc/multiplayer.dart';
 import 'package:quickmath/helpers/constants.dart';
 import 'package:quickmath/helpers/functions.dart';
 import 'package:quickmath/screens/home/home.dart';
@@ -26,12 +27,15 @@ class _AuthenticationState extends State<Authentication> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            ClipPath(
-              clipper: CustomClipOne(),
-              child: Container(
-                height: getHeight(context, height: 27),
-                color: blueColor,
-              ),
+            // ClipPath(
+            //   clipper: CustomClipOne(),
+            //   child: Container(
+            //     height: getHeight(context, height: 27),
+            //     color: blueColor,
+            //   ),
+            // ),
+            Container(
+              height: getHeight(context, height: 27),
             ),
             Center(
               child: Padding(
@@ -52,7 +56,7 @@ class _AuthenticationState extends State<Authentication> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          loadPng('arrowRight'),
+                          loadPng('arrowRight', height: 21),
                           SizedBox(width: 4),
                           Text(
                             'Sign In With Google',
@@ -64,10 +68,14 @@ class _AuthenticationState extends State<Authentication> {
                         ],
                       ),
                       onPressed: () {
+                        MpBloc mpBloc =
+                            Provider.of<MpBloc>(context, listen: false);
                         updateStatus(true);
-                        authBloc.signIn(onDone: () {
+                        authBloc.signIn(onDone: (user) {
+                          mpBloc.uniqueId = user.uid;
                           pushToDispose(context, Home());
-                        }, isUser: () {
+                        }, isUser: (user) {
+                          mpBloc.uniqueId = user.uid;
                           pushToDispose(context, Home());
                         }, onError: () {
                           updateStatus(false);
@@ -85,10 +93,7 @@ class _AuthenticationState extends State<Authentication> {
                   TextSpan(children: [
                     TextSpan(
                         text: '- By clicking "Sign In", You agree to our',
-                        style: TextStyle(
-                            fontFamily: fontThree,
-                            color: greyColor,
-                            fontSize: 12)),
+                        style: TextStyle(fontFamily: fontThree, fontSize: 12)),
                     TextSpan(
                         text: '\nPrivacy Policy.',
                         style: TextStyle(
