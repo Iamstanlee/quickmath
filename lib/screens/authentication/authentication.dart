@@ -7,6 +7,7 @@ import 'package:quickmath/helpers/functions.dart';
 import 'package:quickmath/screens/home/home.dart';
 import 'package:quickmath/widgets/fancy_button.dart';
 import 'package:quickmath/widgets/spinner.dart';
+import 'package:quickmath/widgets/toast.dart';
 
 class Authentication extends StatefulWidget {
   @override
@@ -77,9 +78,11 @@ class _AuthenticationState extends State<Authentication> {
                         }, isUser: (user) {
                           mpBloc.uniqueId = user.uid;
                           pushToDispose(context, Home());
-                        }, onError: () {
+                        }, onError: (err) {
                           updateStatus(false);
-                          print('**SignIn Error**');
+                          Toast.show('Error: ${err.message ?? err.toString()}',
+                              context,
+                              gravity: Toast.TOP, backgroundColor: Colors.red);
                         });
                       },
                       color: Colors.orangeAccent,

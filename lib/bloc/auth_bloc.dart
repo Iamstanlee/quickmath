@@ -28,7 +28,7 @@ class AuthBloc extends ChangeNotifier {
   void signIn(
       {Function(FirebaseUser) onDone,
       Function(FirebaseUser) isUser,
-      Function onError}) async {
+      Function(dynamic) onError}) async {
     FirebaseUser user = await signInWithGoogle(onError: onError);
     if (user != null) {
       await Firestore.instance
@@ -58,8 +58,7 @@ class AuthBloc extends ChangeNotifier {
           isUser(user);
         }
       }).catchError((err) {
-        print('**Error Signing In -> $err**');
-        onError();
+        onError(err);
       });
     }
   }

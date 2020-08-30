@@ -22,6 +22,7 @@ class _LoadGameState extends State<LoadGame> with AfterLayoutMixin<LoadGame> {
   @override
   void afterFirstLayout(BuildContext context) {
     if (widget.gameType == 'MP') {
+//isLoaded:false -> isLoaded:true
       Provider.of<SpBloc>(context, listen: false)
           .generateQuestions(widget.questions, onDone: () {
         Future.delayed(Duration(seconds: 1), () {
