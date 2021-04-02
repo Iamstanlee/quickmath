@@ -136,6 +136,7 @@ class SpBloc with ChangeNotifier {
           'You did great!, Though you can do better dont\'t you think? Play again to improve. ';
     } else if (average >= 7) {
       color = Colors.red;
+
       grade = 'POOR';
       remark =
           'Not your best performance, You can do better. \n Play again to improve.';

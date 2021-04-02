@@ -257,9 +257,8 @@ class MpBloc with ChangeNotifier {
     return await firebaseAuth.currentUser();
   }
 
-  Question getQuestion() {
+  Question getQuestion([int range = 64]) {
     Operator o = getOperator();
-    int range = 64;
     int f, s, a;
     switch (o) {
       case Operator.Addition:
